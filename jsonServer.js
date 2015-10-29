@@ -416,7 +416,9 @@ function isGuessSongServiceCall(pathName){
    var artistId;
    var songId;
    var guessSongJson;
+   var isCorrectReturnValue;
    var isCorrect;
+   var isPartiallyCorrect;
    
    guessSongJson = {
      "result": 1
@@ -435,9 +437,16 @@ function isGuessSongServiceCall(pathName){
      songId = Number(queryData.songId);  
    }
    
-   isCorrect = isCorrectGuess(soloToGuessId, artistId, songId);
+   
+   isCorrectReturnValue = isCorrectGuess(soloToGuessId, artistId, songId);
+   isCorrect = isCorrectReturnValue.isCorrect;
+   isPartiallyCorrect = isCorrectReturnValue.isPartiallyCorrect;
    if (isCorrect === true) {
      guessSongJson.result = 0; //success
+   } else {
+     if (isPartiallyCorrect === true) {
+       guessSongJson.result = -1; //partial
+     }
    }
    
    return guessSongJson;
@@ -493,17 +502,36 @@ function isGuessSongServiceCall(pathName){
  
  function isCorrectGuess(soloToGuessId, artistId, songId) {
    var isCorrect;
+   var isPartiallyCorrect;
    var answerObject;
+   var returnValues;
    
    isCorrect = false;
+   isPartiallyCorrect = false;
    answerObject = getAnswerObjectFromSoloToGuessId(soloToGuessId);
    if (answerObject) {
-     if (artistId === answerObject.artistId && songId === answerObject.songId) {
-       isCorrect = true;
+     
+     if (artistId === answerObject.artistId) {
+       isPartiallyCorrect = true;
+       if (songId === answerObject.songId) {
+         isCorrect = true;
+       }       
+     } else { 
+       //it is a rare possibility to select the wrong artist, but the correct song
+       if (songId === answerObject.songId) {
+         isPartiallyCorrect = true;
+       }
      }
    }
    
-   return isCorrect;
+  console.log('isCorrect: ' + String(isCorrect));
+  console.log('isPartiallyCorrect: ' + String(isPartiallyCorrect));
+   returnValues = {
+     isCorrect: isCorrect,
+     isPartiallyCorrect: isPartiallyCorrect 
+   };
+   
+   return returnValues;
  }
  
  function getAnswerObjectFromSoloToGuessId(soloToGuessId) {
