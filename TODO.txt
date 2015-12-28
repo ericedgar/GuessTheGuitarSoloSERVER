@@ -1,0 +1,21 @@
+-XXXXshow total points when in level 2 and level 3
+-XXXXwhen level 3 is done
+  -XXXXhide audio control
+  -XXXXhide Guess button
+  -XXXXShow grand total points
+  -XXXXadd a start over button
+-XXXXgive extra points for level 2 and level 3
+-XXXXdisable buttons when hitting the server
+-XXXXremove hard coded labels
+-check into github
+-add a no clue button
+-add a timer/countdown clock
+-hide current song label and value
+-add diag mode that will remotely show current song label and value
+-Remove Aurelia nav bar
+-add more songs
+-convert all to OGG
+-randomize the id's
+-change text based on culture
+-deploy to separate site
+-deploy to azure

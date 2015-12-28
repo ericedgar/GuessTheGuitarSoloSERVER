@@ -1,14 +1,10 @@
 var http = require('http');
 var url = require('url');
-var logger = require('nodejslogger')
 
 var allArtistsArray;
 var allSongsArray;
 var answerKeyArray;
 var sessionData;
-var level1AnswerKeyArray;
-var level2AnswerKeyArray;
-var level3AnswerKeyArray;
 
 sessionData = {};
 
@@ -178,9 +174,6 @@ http.createServer(function (request, response) {
  var isGetSongs;
  var isGuess;
  
- logger.init({"file":"output-file.txt", "mode":"DIE"});
- 
- initializeAnswerKeyArrays();
  requestUrl = request.url;
  pathName = getPathNameFromUrl(requestUrl);
  isInitial = isInitialDataServiceCall(pathName);
@@ -201,10 +194,6 @@ http.createServer(function (request, response) {
    default:
  }
 
-//console.log('isInitial:' + String(isInitial));
-//console.log('isGetSongs:' + String(isGetSongs));
-//console.log('isGuess:' + String(isGuess));
-
  jsonPReturnString = "";
  if (jsonObject){
   jsonPCallbackFunctionName = getJsonPCallbackFunctionName(requestUrl);
@@ -216,69 +205,6 @@ http.createServer(function (request, response) {
   response.end();
   
  }).listen(9001);
-
- function initializeAnswerKeyArrays(){
-    if (isArray(level1AnswerKeyArray)){
-    }else{
-      level1AnswerKeyArray = [];
-      initializeAnswerKeyArray(level1AnswerKeyArray, 1);
-      logger.debug('level1AnswerKeyArray length:' + String(level1AnswerKeyArray.length));
-    }
-    
-    if (isArray(level2AnswerKeyArray)){
-    }else{
-      level2AnswerKeyArray = [];
-      initializeAnswerKeyArray(level2AnswerKeyArray, 2);
-      logger.debug('level2AnswerKeyArray length:' + String(level2AnswerKeyArray.length));
-    }
-    
-    if (isArray(level3AnswerKeyArray)){
-    }else{
-      level3AnswerKeyArray = [];
-      initializeAnswerKeyArray(level3AnswerKeyArray, 3);
-      logger.debug('level3AnswerKeyArray length:' + String(level3AnswerKeyArray.length));
-    }
- }
-
- function initializeAnswerKeyArray(arrayToInitialize, level){
-   var index;
-   var songObject;
-   var answerObject;
-   var artistId;
-   var songId;
-   var levelAnswerObject;
-             
-   for(index in allSongsArray) {
-     songObject = allSongsArray[index];
-     if (songObject.level === level) {
-       artistId = songObject.artistId;
-       songId = songObject.id; 
-       // logger.debug('artistId: ' + artistId);
-       // logger.debug('songId: ' + songId);
-       answerObject = getAnswerObjectFromArtistAndSong(artistId, songId);
-       if (answerObject){
-         levelAnswerObject = {
-           "soloToGuessId": answerObject.soloToGuessId, 
-           "artistId": artistId, 
-           "songId": songId,
-           "name": songObject.name,
-           "level": songObject.level 
-         };
-         
-         // if (level === 1){
-          //  console.log('soloToGuessId:' + String(levelAnswerObject.soloToGuessId));
-          //  console.log('artistId:' + String(levelAnswerObject.artistId));
-          //  console.log('songId:' + String(levelAnswerObject.songId));
-          //  console.log('name:' + String(levelAnswerObject.name));
-          //  console.log('level:' + String(levelAnswerObject.level));
-          //  console.log('-------------------------');
-         // }
-         
-         arrayToInitialize.push(levelAnswerObject);         
-       }
-     }
-   }
- }
 
  function isInitialDataServiceCall(pathName){
    var isInitial;
@@ -327,7 +253,7 @@ function isGuessSongServiceCall(pathName){
    queryData = url.parse(requestUrl, true).query;
    if (queryData.sessionId) {
      sessionId = queryData.sessionId;
-     //console.log('sessionId:' + sessionId);
+     console.log('sessionId:' + sessionId);
      if (sessionData){
        
      }else{
@@ -337,14 +263,14 @@ function isGuessSongServiceCall(pathName){
  
      previousSoloToGuessIds = sessionData[sessionId];
      if (previousSoloToGuessIds){
-       //console.log('01 previousSoloToGuessIds length:' + String(previousSoloToGuessIds.length));       
+       console.log('01 previousSoloToGuessIds length:' + String(previousSoloToGuessIds.length));       
       //soloToGuessArtistAndSong = getArtistAndSongDescriptionBySoloToGuessId(soloToGuessId);
       //console.log('previousSoloToGuessArtistAndSong:' + soloToGuessArtistAndSong);
 
      } else {
        previousSoloToGuessIds = [];
        sessionData[sessionId] = previousSoloToGuessIds;
-       //console.log('01 previousSoloToGuessIds length: undefined');
+       console.log('01 previousSoloToGuessIds length: undefined');
      }
 
    }
@@ -359,11 +285,9 @@ function isGuessSongServiceCall(pathName){
      level = 1;
    }
 
-   console.log('level:' + String(level));
-
    soloToGuessId = getUnUsedSoloToGuessId(previousSoloToGuessIds, sessionId, level);
    
-   //console.log('soloToGuessId: ' + soloToGuessId);
+   console.log('soloToGuessId: ' + soloToGuessId);
     
    allArtistsJsonObjectWithBlank = addBlank(allArtistsJsonObject, "artists");
    initialJson = allArtistsJsonObjectWithBlank;
@@ -372,10 +296,10 @@ function isGuessSongServiceCall(pathName){
    
    //todo: remove after debugging
    soloToGuessArtistAndSong = getArtistAndSongDescriptionBySoloToGuessId(soloToGuessId);
-   //console.log('soloToGuessArtistAndSong: ' + soloToGuessArtistAndSong);
+   console.log('soloToGuessArtistAndSong: ' + soloToGuessArtistAndSong);
    initialJson.soloToGuessArtistAndSong = soloToGuessArtistAndSong;
    
-   //console.log('02 previousSoloToGuessIds length:' + String(previousSoloToGuessIds.length));
+   console.log('02 previousSoloToGuessIds length:' + String(previousSoloToGuessIds.length));
    
    return initialJson;
  }
@@ -387,11 +311,9 @@ function isGuessSongServiceCall(pathName){
    var soloToGuessArtistAndSong;
    
    answerObject = getAnswerObjectFromSoloToGuessId(soloToGuessId);
-   if (answerObject){
-     artistObject = getArtistObjectByArtistId(answerObject.artistId);
-     songObject = getSongObjectBySongId(answerObject.songId);
-     soloToGuessArtistAndSong = artistObject.name + '(' + artistObject.id + ') - ' + songObject.name + '(' + songObject.id + ') (' + String(soloToGuessId) + ')';
-   }
+   artistObject = getArtistObjectByArtistId(answerObject.artistId);
+   songObject = getSongObjectBySongId(answerObject.songId);
+   soloToGuessArtistAndSong = artistObject.name + '(' + artistObject.id + ') - ' + songObject.name + '(' + songObject.id + ') (' + String(soloToGuessId) + ')';
    
    return soloToGuessArtistAndSong;
  }
@@ -405,24 +327,22 @@ function isGuessSongServiceCall(pathName){
    var index;
 
    soloToGuessId = getRandomSoloToGuessId(level);
-   logger.debug('getRandomSoloToGuessId.soloToGuessId' + soloToGuessId);
    
    if (previousSoloToGuessIds){
      previousSoloToGuessIdsLength = previousSoloToGuessIds.length;
-     answerKeyLength = getAnswerKeyLength(level);
-     //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
+     answerKeyLength = answerKeyArray.length;
      if (previousSoloToGuessIdsLength >= answerKeyLength){
-       //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
+       console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
        unUsedSoloToGuessId = soloToGuessId;
        previousSoloToGuessIds = [];
        previousSoloToGuessIds.push(unUsedSoloToGuessId);
        sessionData[sessionId] = previousSoloToGuessIds;
        previousSoloToGuessIdsLength = previousSoloToGuessIds.length;
-       //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
+       console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
      } else {
        for (index = 0; index < answerKeyLength; index++) {
          hasBeenUsed = hasSoloToGuessBeenUsed(previousSoloToGuessIds, soloToGuessId);
-         //console.log('hasBeenUsed: ' + hasBeenUsed + ' - soloToGuessId: ' + soloToGuessId);
+         console.log('hasBeenUsed: ' + hasBeenUsed + ' - soloToGuessId: ' + soloToGuessId);
          if (hasBeenUsed === true) {
            soloToGuessId = getRandomSoloToGuessId(level);
          } else {
@@ -447,29 +367,11 @@ function isGuessSongServiceCall(pathName){
  function getRandomSoloToGuessId(level){
    var randomSoloToGuessIndex;
    var soloToGuessId;
-   var answerKeyByLevel;
          
-   randomSoloToGuessIndex = getRandomNumber(level);
-   //console.log('randomSoloToGuessIndex: ' + randomSoloToGuessIndex);
-   answerKeyByLevel = getAnswerKeyArrayByLevel(level);
-   //console.log('----answerKeyByLevel.length: ' + answerKeyByLevel.length);
-   if (answerKeyByLevel){
-     if (answerKeyByLevel[randomSoloToGuessIndex]){
-       soloToGuessId = answerKeyByLevel[randomSoloToGuessIndex].soloToGuessId;  
-     }
-   }
+   randomSoloToGuessIndex = getRandomNumber();
+   soloToGuessId = answerKeyArray[randomSoloToGuessIndex].soloToGuessId;
    
    return soloToGuessId;
- }
-
- function getAnswerKeyLength(level){
-   var length;
-   var answerKeyByLevel;
-   
-   answerKeyByLevel = getAnswerKeyArrayByLevel(level);
-   length = answerKeyByLevel.length;
-   
-   return length;
  }
 
  function hasSoloToGuessBeenUsed(previousSoloToGuessIds, soloToGuessId){
@@ -638,8 +540,8 @@ function isGuessSongServiceCall(pathName){
      }
    }
    
-  //console.log('isCorrect: ' + String(isCorrect));
-  //console.log('isPartiallyCorrect: ' + String(isPartiallyCorrect));
+  console.log('isCorrect: ' + String(isCorrect));
+  console.log('isPartiallyCorrect: ' + String(isPartiallyCorrect));
    returnValues = {
      isCorrect: isCorrect,
      isPartiallyCorrect: isPartiallyCorrect 
@@ -651,48 +553,14 @@ function isGuessSongServiceCall(pathName){
  function getAnswerObjectFromSoloToGuessId(soloToGuessId) {
    var index;
    var answerObject;
-   var answerFound;
-   
-   logger.debug('soloToGuessId: ' + soloToGuessId);
    
    answerObject = null;
-   answerFound = false;
    for(index = 0; index <  answerKeyArray.length; index++) {
      answerObject = answerKeyArray[index];
      if (soloToGuessId === answerObject.soloToGuessId) {
-       answerFound = true;
        break;
      }
    }
-   
-   if (answerFound === true){
-   }else{
-     answerObject = null;
-   }
-   
-   return answerObject;
- }
- 
- function getAnswerObjectFromArtistAndSong(artistId, songId) {
-   var index;
-   var answerObject;
-   var answerFound;
-   
-   answerObject = null;
-   answerFound = false;
-   for(index = 0; index <  answerKeyArray.length; index++) {
-     answerObject = answerKeyArray[index];
-     if (artistId === answerObject.artistId && songId === answerObject.songId) {
-       answerFound = true;
-       logger.debug('answerFound: ' + String(answerFound));
-       break;
-     }
-   }
-   
-   if (answerFound === true){
-   }else{
-     answerObject = null;
-   }   
    
    return answerObject;
  }
@@ -763,52 +631,16 @@ function isGuessSongServiceCall(pathName){
    return isNbr;
  }
  
- function getRandomNumber(level) {
+ function getRandomNumber() {
    var randomNumber;
    var minNumber;
    var maxNumber;
-   var answerKeyByLevel;
    
    minNumber = 0;
-   answerKeyByLevel = getAnswerKeyArrayByLevel(level);
-   if (answerKeyByLevel){
-     maxNumber = answerKeyByLevel.length - 1;
-     logger.debug('maxNumber:' + String(maxNumber));
-     randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;     
-   }
+   maxNumber = answerKeyArray.length - 1;
+   randomNumber = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
 
    return randomNumber;
- }
- 
- function getAnswerKeyArrayByLevel(level){
-  var returnValue;
-  
-  logger.debug('level: ' + String(level));
-  
-  switch (level){
-    case 1:
-      returnValue = level1AnswerKeyArray;
-      break;
-    case 2:
-      returnValue = level2AnswerKeyArray;
-      break;
-    case 3:
-      returnValue = level3AnswerKeyArray;
-      break;
-    default:
-  }
-  return returnValue;
- }
- 
- function isArray(object) {
-   var returnValue;
-    if (object instanceof Array) {
-      returnValue = true;
-    } else{
-      returnValue = false;
-    }
-    
-    return returnValue
  }
  
  console.log('9001 Server started');
