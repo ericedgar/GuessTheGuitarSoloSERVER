@@ -1,3 +1,6 @@
+http://localhost:9000
+
+-auto select 1st row if only 1
 -XXXXshow total points when in level 2 and level 3
 -XXXXwhen level 3 is done
   -XXXXhide audio control
@@ -7,7 +10,9 @@
 -XXXXgive extra points for level 2 and level 3
 -XXXXdisable buttons when hitting the server
 -XXXXremove hard coded labels
--check into github
+-XXXXcheck into github
+-fix mp3 sound
+-Add a genre filter
 -add a no clue button
 -add a timer/countdown clock
 -hide current song label and value
@@ -19,3 +24,45 @@
 -change text based on culture
 -deploy to separate site
 -deploy to azure
+-XXXXsearch box, filter as you type
+-XXXXadd clear filter for search box 
+-XXXXvalidate that an artist and song is selected
+-XXXXadd sort button
+-XXXXuse list boxes to display artist and songs, song listbox is dynamically sized
+-XXXXadd validation if artist or song isn't selected
+-XXXXdon't use an ugly alert for validation
+-dictionary-enable labels 
+-display what you just guessed using toastr and whether it is correct, partially correct or incorrect
+-show your guess and if you were correct on button click of answered result buttons
+-onClearButtonClicked should be methodized
+-XXXXuse bootstrap modals
+-responsive design
+-application insights
+
+http://twitter.com/search/users?q=edgar&category=people&source=find_on_twitter"
+
+
+787 + 241 + 174
+
+880  + 241
+1269
+
+ data-toggle="modal" data-target="#myModal"
+<button type="button" click.trigger="onGiveUpButtonClicked()" disabled.two-way="isButtonsDisabled" class="btn btn-default">${giveUpButtonLabelText}</button>
+
+http://www.tutorialrepublic.com/twitter-bootstrap-tutorial/bootstrap-modals.php
+
+bower install toastr
+
+azure storage
+https://guitarsolo.blob.core.windows.net/highscore
+storage key1: 4K62kI2vjVVJxkX4XjeruSyO0Byp4z+9XOB+pc7beGc0nHpW7M1/7h2WbtyO1raDFjhT0VPAQPKDRn2aKcZpgg==
+storage connection string1: DefaultEndpointsProtocol=https;AccountName=guitarsolo;AccountKey=4K62kI2vjVVJxkX4XjeruSyO0Byp4z+9XOB+pc7beGc0nHpW7M1/7h2WbtyO1raDFjhT0VPAQPKDRn2aKcZpgg==;EndpointSuffix=core.windows.net
+
+server-side code:
+C:\Users\eric\Documents\Visual Studio Code Projects\nodejsHelloWorld\jsonServer.js
+
+client-side code
+C:\Users\eric\projects\navigation-app\src\guitarSolo.html and guitarSolo.js
+
+github

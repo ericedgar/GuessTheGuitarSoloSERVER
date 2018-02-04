@@ -1,6 +1,7 @@
 var http = require('http');
 var url = require('url');
-var logger = require('nodejslogger')
+var logger = require('nodejslogger');
+var azure = require('azure-storage');
 
 var allArtistsArray;
 var allSongsArray;
@@ -9,6 +10,7 @@ var sessionData;
 var level1AnswerKeyArray;
 var level2AnswerKeyArray;
 var level3AnswerKeyArray;
+var AZURE_STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=guitarsolo;AccountKey=4K62kI2vjVVJxkX4XjeruSyO0Byp4z+9XOB+pc7beGc0nHpW7M1/7h2WbtyO1raDFjhT0VPAQPKDRn2aKcZpgg==;EndpointSuffix=core.windows.net";
 
 sessionData = {};
 
@@ -53,8 +55,16 @@ allArtistsArray = [
       {"name": "Vinnie Vincent Invasion", "id": 5036},
       {"name": "Motorhead", "id": 5037},
       {"name": "Twisted Sister", "id": 5038},
-      {"name": "Mark Chestnut", "id": 5039},
-      {"name": "Kix", "id": 5040}
+      {"name": "Mark Chestnutt", "id": 5039},
+      {"name": "Kix", "id": 5040},
+      {"name": "Lynyrd Skynyrd", "id": 5041},
+      {"name": "Pink Floyd", "id": 5042},
+      {"name": "The Cult", "id": 5043},
+      {"name": "Ozzy Osbourne", "id": 5044},
+      {"name": "Chuck Berry", "id": 5045},
+      {"name": "Rush", "id": 5046},
+      {"name": "Jimi Hendrix", "id": 5047},
+      {"name": "Van Halen", "id": 5048}
      ];
   allArtistsArray.sort(function(a, b) {
     if (a.name < b.name) {
@@ -62,57 +72,74 @@ allArtistsArray = [
     }
     return 1;
     });
+
+    // <input type="checkbox" id="rock" value="1" checked /><label for="rock">Rock</label>
+    // <input type="checkbox" id="metal" value="2" checked /><label for="metal">Metal</label>
+    // <input type="checkbox" id="classic" value="3" checked /><label for="classic">Classic</label>
+    // <input type="checkbox" id="country" value="4" checked /><label for="country">Country</label>
+
 allSongsArray = [
-      {"name":"Master Of Puppets", "id": 6001, "artistId": 5001, "level": 1},
-      {"name":"Jimmy's Fantasy", "id": 6002, "artistId": 5002, "level": 3},
-      {"name":"Follow My Heart", "id": 6003, "artistId": 5003, "level": 2}, 
-      {"name":"Out Of Season", "id": 6004, "artistId": 5003, "level": 2}, 
-      {"name":"Looks That Kill", "id": 6005, "artistId": 5004, "level": 1},
-      {"name":"Metal Health", "id": 6006, "artistId": 5005, "level": 2},
-      {"name":"Let's Get Crazy", "id": 6007, "artistId": 5005, "level": 3},
-      {"name":"Open Invitation", "id": 6008, "artistId": 5006, "level": 1},
-      {"name":"Die By The Sword", "id": 6009, "artistId": 5007, "level": 2},
-      {"name":"Shout At The Devil", "id": 6010, "artistId": 5004, "level": 1},
-      {"name":"Rainbow In The Dark", "id": 6011, "artistId": 5008, "level": 1},
-      {"name":"Kryptonite", "id": 6012, "artistId": 5009, "level": 1},
-      {"name":"I Am One", "id": 6013, "artistId": 5010, "level": 2},
-      {"name":"Cherry Pie", "id": 6014, "artistId": 5011, "level": 1},
-      {"name":"Down Boys", "id": 6015, "artistId": 5011, "level": 1},
-      {"name":"Breaking The Chains", "id": 6016, "artistId": 5012, "level": 2},
-      {"name":"Since You've Been Gone", "id": 6017, "artistId": 5013, "level": 1},
-      {"name":"Modern Day Cowboy", "id": 6018, "artistId": 5014, "level": 1},
-      {"name":"Take It Off", "id": 6019, "artistId": 5015, "level": 2},
-      {"name":"Say It Isn't So", "id": 6020, "artistId": 5016, "level": 1},
-      {"name":"Your Love", "id": 6021, "artistId": 5016, "level": 1},
-      {"name":"Ain't No Right", "id": 6022, "artistId": 5017, "level": 2},
-      {"name":"Misery Business", "id": 6023, "artistId": 5018, "level": 2},
-      {"name":"The Ripper", "id": 6024, "artistId": 5019, "level": 1},
-      {"name":"Remedy", "id": 6025, "artistId": 5020, "level": 2},
-      {"name":"Swing, Swing", "id": 6026, "artistId": 5021, "level": 1},
-      {"name":"Nothin' To Lose", "id": 6027, "artistId": 5022, "level": 2},
-      {"name":"Crab", "id": 6028, "artistId": 5023, "level": 3},
-      {"name":"Heart Shaped Box", "id": 6029, "artistId": 5024, "level": 1},
-      {"name":"Surprise You're Dead", "id": 6030, "artistId": 5025, "level": 3},
-      {"name":"Bad Luck", "id": 6031, "artistId": 5026, "level": 2},
-      {"name":"It Only Hurts", "id": 6032, "artistId": 5027, "level": 2},
-      {"name":"Jailhouse Rock", "id": 6033, "artistId": 5028, "level": 1},
-      {"name":"Ain't Nothin' But A Hound Dog", "id": 6034, "artistId": 5028, "level": 1},
-      {"name":"Peggy Sue", "id": 6035, "artistId": 5029, "level": 1},
-      {"name":"Heartbreaker", "id": 6036, "artistId": 5030, "level": 1},
-      {"name":"Lay Me Down In The Tall Grass", "id": 6037, "artistId": 5031, "level": 1},
-      {"name":"Powerslave", "id": 6038, "artistId": 5032, "level": 2},
-      {"name":"Big Cheese", "id": 6039, "artistId": 5024, "level": 3},
-      {"name":"Moving", "id": 6040, "artistId": 5033, "level": 3},
-      {"name":"Motorbreath", "id": 6041, "artistId": 5001, "level": 2},
-      {"name":"American Idiot", "id": 6042, "artistId": 5034, "level": 1}, 
-      {"name":"We're An American Band", "id": 6043, "artistId": 5035, "level": 1},
-      {"name":"Boyz are Gonna Rock", "id": 6044, "artistId": 5036, "level": 2},
-      {"name":"Ace Of Spades", "id": 6045, "artistId": 5037, "level": 1},
-      {"name":"Were Not Gonna Take It", "id": 6046, "artistId": 5038, "level": 1},
-      {"name":"Breed", "id": 6047, "artistId": 5024, "level": 2},
-      {"name":"Siva", "id": 6048, "artistId": 5010, "level": 2},
-      {"name":"Sure Is Monday", "id": 6049, "artistId": 5039, "level": 3},
-      {"name":"Cold Blood", "id": 6050, "artistId": 5040, "level": 2}
+      {"name":"Master Of Puppets", "id": 6001, "artistId": 5001, "level": 1, "genre": 2},
+      {"name":"Jimmy's Fantasy", "id": 6002, "artistId": 5002, "level": 3, "genre": 1},
+      {"name":"Follow My Heart", "id": 6003, "artistId": 5003, "level": 2, "genre": 3}, 
+      {"name":"Out Of Season", "id": 6004, "artistId": 5003, "level": 2, "genre": 3}, 
+      {"name":"Looks That Kill", "id": 6005, "artistId": 5004, "level": 1, "genre": 2},
+      {"name":"Metal Health", "id": 6006, "artistId": 5005, "level": 2, "genre": 2},
+      {"name":"Let's Get Crazy", "id": 6007, "artistId": 5005, "level": 3, "genre": 2},
+      {"name":"Open Invitation", "id": 6008, "artistId": 5006, "level": 1, "genre": 3},
+      {"name":"Die By The Sword", "id": 6009, "artistId": 5007, "level": 2, "genre": 2},
+      {"name":"Shout At The Devil", "id": 6010, "artistId": 5004, "level": 1, "genre": 2},
+      {"name":"Rainbow In The Dark", "id": 6011, "artistId": 5008, "level": 1, "genre": 2},
+      {"name":"Kryptonite", "id": 6012, "artistId": 5009, "level": 1, "genre": 1},
+      {"name":"I Am One", "id": 6013, "artistId": 5010, "level": 2, "genre": 1},
+      {"name":"Cherry Pie", "id": 6014, "artistId": 5011, "level": 1, "genre": 2},
+      {"name":"Down Boys", "id": 6015, "artistId": 5011, "level": 1, "genre": 2},
+      {"name":"Breaking The Chains", "id": 6016, "artistId": 5012, "level": 2, "genre": 1},
+      {"name":"Since You've Been Gone", "id": 6017, "artistId": 5013, "level": 1, "genre": 3},
+      {"name":"Modern Day Cowboy", "id": 6018, "artistId": 5014, "level": 1, "genre": 1},
+      {"name":"Take It Off", "id": 6019, "artistId": 5015, "level": 2, "genre": 1},
+      {"name":"Say It Isn't So", "id": 6020, "artistId": 5016, "level": 1, "genre": 1},
+      {"name":"Your Love", "id": 6021, "artistId": 5016, "level": 1, "genre": 1},
+      {"name":"Ain't No Right", "id": 6022, "artistId": 5017, "level": 2, "genre": 1},
+      {"name":"Misery Business", "id": 6023, "artistId": 5018, "level": 2, "genre": 1},
+      {"name":"The Ripper", "id": 6024, "artistId": 5019, "level": 1, "genre": 2},
+      {"name":"Remedy", "id": 6025, "artistId": 5020, "level": 2, "genre": 1},
+      {"name":"Swing, Swing", "id": 6026, "artistId": 5021, "level": 1, "genre": 1},
+      {"name":"Nothin' To Lose", "id": 6027, "artistId": 5022, "level": 2, "genre": 3},
+      {"name":"Crab", "id": 6028, "artistId": 5023, "level": 3, "genre": 1},
+      {"name":"Heart Shaped Box", "id": 6029, "artistId": 5024, "level": 1, "genre": 1},
+      {"name":"Surprise You're Dead", "id": 6030, "artistId": 5025, "level": 3, "genre": 1},
+      {"name":"Bad Luck", "id": 6031, "artistId": 5026, "level": 2, "genre": 1},
+      {"name":"It Only Hurts", "id": 6032, "artistId": 5027, "level": 2, "genre": 1},
+      {"name":"Jailhouse Rock", "id": 6033, "artistId": 5028, "level": 1, "genre": 4},
+      {"name":"Ain't Nothin' But A Hound Dog", "id": 6034, "artistId": 5028, "level": 1, "genre": 4},
+      {"name":"Peggy Sue", "id": 6035, "artistId": 5029, "level": 1, "genre": 4},
+      {"name":"Heartbreaker", "id": 6036, "artistId": 5030, "level": 1, "genre": 3},
+      {"name":"Second Hand News", "id": 6037, "artistId": 5031, "level": 2, "genre": 3},
+      {"name":"Powerslave", "id": 6038, "artistId": 5032, "level": 2, "genre": 2},
+      {"name":"Big Cheese", "id": 6039, "artistId": 5024, "level": 3, "genre": 1},
+      {"name":"Moving", "id": 6040, "artistId": 5033, "level": 3, "genre": 1},
+      {"name":"Motorbreath", "id": 6041, "artistId": 5001, "level": 2, "genre": 2},
+      {"name":"American Idiot", "id": 6042, "artistId": 5034, "level": 1, "genre": 1}, 
+      {"name":"We're An American Band", "id": 6043, "artistId": 5035, "level": 1, "genre": 3},
+      {"name":"Boyz are Gonna Rock", "id": 6044, "artistId": 5036, "level": 2, "genre": 2},
+      {"name":"Ace Of Spades", "id": 6045, "artistId": 5037, "level": 1, "genre": 1},
+      {"name":"Were Not Gonna Take It", "id": 6046, "artistId": 5038, "level": 1, "genre": 2},
+      {"name":"Breed", "id": 6047, "artistId": 5024, "level": 2, "genre": 1},
+      {"name":"Siva", "id": 6048, "artistId": 5010, "level": 2, "genre": 1},
+      {"name":"Sure Is Monday", "id": 6049, "artistId": 5039, "level": 3, "genre": 5},
+      {"name":"Cold Blood", "id": 6050, "artistId": 5040, "level": 2, "genre": 1},
+      {"name":"Free Bird", "id": 6051, "artistId": 5041, "level": 1, "genre": 3},
+      {"name":"Comfortably Numb", "id": 6052, "artistId": 5042, "level": 1, "genre": 3},
+      {"name":"Wild Flower", "id": 6053, "artistId": 5043, "level": 1, "genre": 1},
+      {"name":"Lil Devil", "id": 6054, "artistId": 5043, "level": 2, "genre": 1},
+      {"name":"Crazy Train", "id": 6055, "artistId": 5044, "level": 1, "genre": 3},
+      {"name":"Enter Sandman", "id": 6056, "artistId": 5001, "level": 1, "genre": 2},
+      {"name":"Johnny B Goode", "id": 6057, "artistId": 5045, "level": 1, "genre": 4},
+      {"name":"Freewill", "id": 6058, "artistId": 5046, "level": 1, "genre": 3},
+      {"name":"Purple Haze", "id": 6059, "artistId": 5047, "level": 1, "genre": 3},
+      {"name":"Running With The Devil", "id": 6060, "artistId": 5048, "level": 1, "genre": 3},
+      {"name":"You Really Got Me", "id": 6061, "artistId": 5048, "level": 1, "genre": 3}
      ];
 
 answerKeyArray = [
@@ -152,7 +179,7 @@ answerKeyArray = [
        {"soloToGuessId": 16433, "artistId": 5028, "songId": 6034},  //Elvis hound
        {"soloToGuessId": 16434, "artistId": 5029, "songId": 6035},  //Buddy Peggy
        {"soloToGuessId": 16435, "artistId": 5030, "songId": 6036},   //Pat Benatar - Heartbreaker
-       {"soloToGuessId": 16436, "artistId": 5031, "songId": 6037},  //Fleetwood Mac - Lay Me Down In The Tall Grass
+       {"soloToGuessId": 16436, "artistId": 5031, "songId": 6037},  //Fleetwood Mac - Second Hand News
        {"soloToGuessId": 16437, "artistId": 5032, "songId": 6038},   //Iron Maiden - Powerslave
        {"soloToGuessId": 16438, "artistId": 5024, "songId": 6039},   //Nirvana - Big Cheese
        {"soloToGuessId": 16439, "artistId": 5033, "songId": 6040},    //Suede - Moving
@@ -164,8 +191,19 @@ answerKeyArray = [
        {"soloToGuessId": 16445, "artistId": 5038, "songId": 6046}, //Twisted Sister Were Not Gonna Take It
        {"soloToGuessId": 16446, "artistId": 5024, "songId": 6047}, //Nirvana Breed
        {"soloToGuessId": 16447, "artistId": 5010, "songId": 6048}, //Smashing Pumpkins Siva
-       {"soloToGuessId": 16448, "artistId": 5039, "songId": 6049},  //Mark Chestnut Sure Is Monday
-       {"soloToGuessId": 16449, "artistId": 5040, "songId": 6050}  //Mark Chestnut Sure Is Monday    
+       {"soloToGuessId": 16448, "artistId": 5039, "songId": 6049},  //Mark Chestnutt Sure Is Monday
+       {"soloToGuessId": 16449, "artistId": 5040, "songId": 6050},
+       {"soloToGuessId": 16450, "artistId": 5041, "songId": 6051},  //Lynyrd Skynyrd Free Bird
+       {"soloToGuessId": 16451, "artistId": 5042, "songId": 6052},  //Pink Floyd Comfortably Numb
+       {"soloToGuessId": 16452, "artistId": 5043, "songId": 6053},  //The Cult Wild Flower
+       {"soloToGuessId": 16453, "artistId": 5043, "songId": 6054},  //The Cult Lil Devil
+       {"soloToGuessId": 16454, "artistId": 5044, "songId": 6055},  //Ozzy Crazy Train
+       {"soloToGuessId": 16455, "artistId": 5001, "songId": 6056},   //Metallica Enter Sandman
+       {"soloToGuessId": 16456, "artistId": 5045, "songId": 6057},   //Chuck Berry Johnny B Goode
+       {"soloToGuessId": 16457, "artistId": 5046, "songId": 6058},   //Rush Freewill
+       {"soloToGuessId": 16458, "artistId": 5047, "songId": 6059},   //Jimi Hendrix Purple Haze
+       {"soloToGuessId": 16459, "artistId": 5048, "songId": 6060},   //Van Halen Running with the devil
+       {"soloToGuessId": 16460, "artistId": 5048, "songId": 6061}   //Van Halen You Really Got me
      ];
 
 http.createServer(function (request, response) {
@@ -177,8 +215,66 @@ http.createServer(function (request, response) {
  var isInitial;
  var isGetSongs;
  var isGuess;
+ var blobSvc;
  
- logger.init({"file":"output-file.txt", "mode":"DIE"});
+ //logger.init({"file":"output-file.txt", "mode":"DIE"});
+
+ var highScoreObject;
+ var highScoreArray;
+ var highScoreJSON;
+
+ highScoreObject = {
+  "rank": 1, 
+  "name": "EME", 
+  "score": 145,
+  "difficulty": 2
+};
+
+highScoreArray = [];
+highScoreArray.push(highScoreObject);
+highScoreJSON = JSON.stringify(highScoreArray);
+
+console.log('highScoreJSON:' + highScoreJSON);
+
+try {
+  var containerName = "highscore";
+  var blobName = "scores";
+  //blobSvc = azure.createBlobService(AZURE_STORAGE_CONNECTION_STRING);
+
+  //console.log('create blobSvc:' + blobSvc);
+
+  // blobSvc.createBlockBlobFromText(containerName, blobName, highScoreJSON, function errorBlob(error, result, response) {
+  //   var err;
+  //   err = error;
+
+  //   console.log('createBlockBlobFromText error :' + err.message);
+
+  // });
+
+
+  // blobSvc.listBlobsSegmented('mycontainer', null, function(error, result, response){
+  //   if(!error){
+  //       // result.entries contains the entries
+  //       // If not all blobs were returned, result.continuationToken has the continuation token.
+  //   }
+  // });
+
+  // blobSvc.getBlobToText(
+  //   containerName,
+  //   blobName,
+  //   function(err, blobContent, blob) {
+  //       if (err) {
+  //           console.error("Couldn't download blob %s", blobName);
+  //           console.error(err);
+  //       } else {
+  //           console.log("Sucessfully downloaded blob %s", blobName);
+  //           console.log(blobContent);
+  //       }
+  //   });
+
+} catch(err) {
+  console.log('create blobSvc error :' + err.message);
+}
  
  initializeAnswerKeyArrays();
  requestUrl = request.url;
@@ -265,14 +361,14 @@ http.createServer(function (request, response) {
            "level": songObject.level 
          };
          
-         // if (level === 1){
-          //  console.log('soloToGuessId:' + String(levelAnswerObject.soloToGuessId));
-          //  console.log('artistId:' + String(levelAnswerObject.artistId));
-          //  console.log('songId:' + String(levelAnswerObject.songId));
-          //  console.log('name:' + String(levelAnswerObject.name));
-          //  console.log('level:' + String(levelAnswerObject.level));
-          //  console.log('-------------------------');
-         // }
+         if (level === 1){
+           console.log('soloToGuessId:' + String(levelAnswerObject.soloToGuessId));
+           console.log('artistId:' + String(levelAnswerObject.artistId));
+           console.log('songId:' + String(levelAnswerObject.songId));
+           console.log('name:' + String(levelAnswerObject.name));
+           console.log('level:' + String(levelAnswerObject.level));
+           console.log('-------------------------');
+         }
          
          arrayToInitialize.push(levelAnswerObject);         
        }
@@ -297,6 +393,7 @@ function isGetSongsByArtistServiceCall(pathName){
   isGetSongs = false;
   if(pathName === "/getSongsByArtist"){
     isGetSongs = true;
+    //console.log("");
   }
   
   return isGetSongs;
@@ -349,8 +446,12 @@ function isGuessSongServiceCall(pathName){
 
    }
    
+   var allArtistsAndAllSongsArray;
+   allArtistsAndAllSongsArray = mergeAllArtistsAndAllSongs();
+
    allArtistsJsonObject = {
-     "artists": allArtistsArray
+     "artists": allArtistsArray,
+     "artistsAndSongs": allArtistsAndAllSongsArray
     };
 
    if (isNumber(queryData.level)) {
@@ -359,7 +460,7 @@ function isGuessSongServiceCall(pathName){
      level = 1;
    }
 
-   console.log('level:' + String(level));
+   //console.log('level:' + String(level));
 
    soloToGuessId = getUnUsedSoloToGuessId(previousSoloToGuessIds, sessionId, level);
    
@@ -390,9 +491,21 @@ function isGuessSongServiceCall(pathName){
    if (answerObject){
      artistObject = getArtistObjectByArtistId(answerObject.artistId);
      songObject = getSongObjectBySongId(answerObject.songId);
-     soloToGuessArtistAndSong = artistObject.name + '(' + artistObject.id + ') - ' + songObject.name + '(' + songObject.id + ') (' + String(soloToGuessId) + ')';
+     soloToGuessArtistAndSong = getArtistAndSongDescription(answerObject.artistId, answerObject.songId);
    }
    
+   return soloToGuessArtistAndSong;
+ }
+
+ function getArtistAndSongDescription(artistId, songId){
+   var artistObject;
+   var songObject;
+   var soloToGuessArtistAndSong;
+
+   artistObject = getArtistObjectByArtistId(artistId);
+   songObject = getSongObjectBySongId(songId);
+   soloToGuessArtistAndSong = artistObject.name + ' - ' + songObject.name;
+
    return soloToGuessArtistAndSong;
  }
 
@@ -403,14 +516,15 @@ function isGuessSongServiceCall(pathName){
    var previousSoloToGuessIdsLength;
    var answerKeyLength;
    var index;
+   var previousSoloIndex;
 
    soloToGuessId = getRandomSoloToGuessId(level);
-   logger.debug('getRandomSoloToGuessId.soloToGuessId' + soloToGuessId);
+   //logger.debug('getRandomSoloToGuessId.soloToGuessId' + soloToGuessId);
    
    if (previousSoloToGuessIds){
      previousSoloToGuessIdsLength = previousSoloToGuessIds.length;
      answerKeyLength = getAnswerKeyLength(level);
-     //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
+     console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
      if (previousSoloToGuessIdsLength >= answerKeyLength){
        //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
        unUsedSoloToGuessId = soloToGuessId;
@@ -418,16 +532,22 @@ function isGuessSongServiceCall(pathName){
        previousSoloToGuessIds.push(unUsedSoloToGuessId);
        sessionData[sessionId] = previousSoloToGuessIds;
        previousSoloToGuessIdsLength = previousSoloToGuessIds.length;
-       //console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
+       console.log('previousSoloToGuessIdsLength: ' + previousSoloToGuessIdsLength + ' - answerKeyLength: ' + answerKeyLength);
      } else {
        for (index = 0; index < answerKeyLength; index++) {
          hasBeenUsed = hasSoloToGuessBeenUsed(previousSoloToGuessIds, soloToGuessId);
-         //console.log('hasBeenUsed: ' + hasBeenUsed + ' - soloToGuessId: ' + soloToGuessId);
+         console.log('hasBeenUsed: ' + hasBeenUsed + ' - soloToGuessId: ' + soloToGuessId);
          if (hasBeenUsed === true) {
            soloToGuessId = getRandomSoloToGuessId(level);
          } else {
            unUsedSoloToGuessId = soloToGuessId;
-           previousSoloToGuessIds.push(unUsedSoloToGuessId);
+           previousSoloIndex = previousSoloToGuessIds.indexOf(unUsedSoloToGuessId);
+           if (previousSoloIndex === -1) {
+            previousSoloToGuessIds.push(unUsedSoloToGuessId);
+           } else {
+             console.log('already exists in previousSoloToGuessIds - unUsedSoloToGuessId: ' + unUsedSoloToGuessId + ' previousSoloIndex:' + previousSoloIndex + ' previousSoloToGuessIdsLength: ' + previousSoloToGuessIds.length);
+           }
+           
            break;
          }
        }
@@ -563,6 +683,12 @@ function isGuessSongServiceCall(pathName){
      }
    }
    
+  guessSongJson.artistId = artistId;
+  guessSongJson.songId = songId;
+  var artistAndSongDescription;
+  artistAndSongDescription = getArtistAndSongDescription(artistId, songId);
+  guessSongJson.artistAndSongDescription = artistAndSongDescription;
+
    return guessSongJson;
  }
 
@@ -733,7 +859,44 @@ function isGuessSongServiceCall(pathName){
    }
    return songObject;
  }
-     
+
+ function mergeAllArtistsAndAllSongs() {
+  var index;
+  var songIndex;
+  var artistObject;
+  var artistId;
+  var songObjectArray; 
+  var songObject;
+  var allArtistsAndAllSongObject;
+  var allArtistsAndAllSongsArray;
+  
+  allArtistsAndAllSongsArray = [];
+  for(index in allArtistsArray) {
+    artistObject = allArtistsArray[index];
+    //{"name": "Metallica", "id": 5001},
+    artistId = artistObject.id;
+    songObjectArray = getSongObjectArrayByArtistId(artistId);
+    for(songIndex in songObjectArray) {
+      songObject = songObjectArray[songIndex];
+      //{"name":"Master Of Puppets", "id": 6001, "artistId": 5001, "level": 1}
+      allArtistsAndAllSongObject = {
+        "artistName": artistObject.name,
+        "artistId": artistId,
+        "songName": songObject.name,
+        "songId": songObject.id,
+        "level": songObject.level,
+        "key": String(artistId) + "|" + songObject.id,
+        "isChecked": false,
+        "genre": songObject.genre,
+        "imageUrl": "dist/images/" + String(artistId) + ".png"
+      };
+
+      allArtistsAndAllSongsArray.push(allArtistsAndAllSongObject);
+    }
+  }
+  return allArtistsAndAllSongsArray;
+ }
+
  function getArtistObjectByArtistId(artistId){
    var index;
    var artistObject;
